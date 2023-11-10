@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import './App.css';
 import { ActionTypes, useContextState } from "./contextState";
+import axios from 'axios'; 
 
 function Detalle() {
   const { contextState, setContextState } = useContextState();
@@ -10,16 +11,10 @@ function Detalle() {
       try {
         setContextState({ newValue: true, type: ActionTypes.setLoading });
 
-        const response = await fetch(
-          `https://dummyjson.com/cars/1`,
-          {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-          }
-        );
-
-        if (response.ok) {
-          const detallesAuto = await response.json();
+        const response = await axios.get(`https://dummyjson.com/cars/1`);
+        
+        if (response.status === 200) {
+          const detallesAuto = response.data; 
           setContextState({
             newValue: detallesAuto,
             type: ActionTypes.setDetallado,
@@ -52,7 +47,7 @@ function Detalle() {
               <br /><br /><br /><br />
               <li>Marca: {contextState.marca}</li>
               <li>Modelo: {contextState.modelo}</li>
-              <li>Año: {contextState.anno}</li>
+              <li>Año: {contextState.año}</li>
               <li>Color: {contextState.color}</li>
             </ul>
           </div>

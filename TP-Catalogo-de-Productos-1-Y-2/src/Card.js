@@ -1,30 +1,14 @@
-import React, { useContext, useEffect, useState } from "react";
+import React from "react";
 import "./App.css";
-import { useContextState } from "./contextState";
-import axios from "axios";
+import { useContextState, ActionTypes } from "./contextState";
+import axios from 'axios'; 
 
 export default function Card() {
-  const { contextState } = useContextState();
-  const [productos, setProductos] = useState([]);
-  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
-
-  useEffect(() => {
-    axios.get('https://dummyjson.com/docs/products')
-      .then(response => {
-        setProductos(response.data);
-      })
-      .catch(error => {
-        console.error('Error al obtener productos desde la API', error);
-      });
-  }, []);
-
-  const productosFiltrados = categoriaSeleccionada
-    ? productos.filter(producto => producto.categoria === categoriaSeleccionada)
-    : productos;
+  const { contextState, setContextState } = useContextState();
 
   const Tarjeta = ({ producto }) => {
     return (
-      <div className="col">
+      <div className="col" key={producto.id}>
         <div className="card">
           <img src={producto.thumbnail} className="card-img-top imagen" alt="..." />
           <div className="card-body">
@@ -39,20 +23,11 @@ export default function Card() {
 
   return (
     <div className="container text-center">
-      <div className="categoria-filter">
-        <select
-          value={categoriaSeleccionada}
-          onChange={(e) => setCategoriaSeleccionada(e.target.value)}
-        >
-          <option value="">Todas las categorías</option>
-          <option value="categoria1">Categoría 1</option>
-          <option value="categoria2">Categoría 2</option>
-        </select>
-      </div>
       <div className="row">
-        {productosFiltrados.map((producto) => (
-          <Tarjeta key={producto.id} producto={producto} />
-        ))}
+        {Array.isArray(contextState.busqueda) &&
+          contextState.busqueda.map((producto) => (
+            <Tarjeta key={producto.id} producto={producto} />
+          ))}
       </div>
     </div>
   );

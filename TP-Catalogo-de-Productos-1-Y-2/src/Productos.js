@@ -1,39 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import './App.css';
 import Card from './Card';
 import { ActionTypes, useContextState } from './contextState';
+import axios from 'axios'; 
 
 function Productos() {
   const { contextState, setContextState } = useContextState();
-  const [buscado, setBuscado] = useState('');
+  const [buscado, setBuscado] = React.useState('');
 
   useEffect(() => {
-    fetchProductos();
-  }, [buscado]);
-
-  const fetchProductos = async () => {
-    try {
-      setContextState({ newValue: true, type: ActionTypes.setLoading });
-
-      const response = await fetch(`https://dummyjson.com/products?limit=10&skip=10&select=title,price,thumbnail/search?q=${buscado}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      if (response.ok) {
-        const resultados = await response.json();
-        setContextState({ newValue: resultados.products, type: ActionTypes.setBusqueda });
-      } else {
-        alert('Error al obtener productos desde la API');
-        console.error('Error al obtener productos desde la API');
+    const fetchProductos = async () => {
+      try {
+        setContextState({ newValue: true, type: ActionTypes.SET_LOADING });
+        const response = await axios.get(`https://dummyjson.com/products?limit=10&skip=10&select=title,price,thumbnail/search?q=${buscado}`);
+        setContextState({ newValue: response.data.products, type: ActionTypes.setBusqueda });
+      } catch (error) {
+        alert(JSON.stringify(error));
+        console.error(error);
+      } finally {
+        setContextState({ newValue: false, type: ActionTypes.SET_LOADING });
       }
+    };
 
-      setContextState({ newValue: false, type: ActionTypes.setLoading });
-    } catch (error) {
-      alert(JSON.stringify(error));
-      console.error(error);
-    }
-  };
+    fetchProductos();
+  }, [buscado, setContextState]);
 
   const handleSearch = (e) => {
     e.preventDefault();
